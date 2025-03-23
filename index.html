@@ -74,9 +74,6 @@
         <div id="info-container">
             <span id="round-info"></span>
         </div>
-        <div id="info-container">
-            <span id="round-info"></span>
-        </div>
         <div id="options-container"></div>
 
     </div>
@@ -130,10 +127,10 @@
     const originalNextQuestion = window.nextQuestion;
     
     function prepareNextQuestion() {
-        
         currentRound++;
+        
         if (currentRound > totalRounds) {
-            showFinalResult();
+            location.reload();
             return;
         }
         
@@ -154,7 +151,6 @@
         }
         
         updateInfo();
-        
     }
     
     window.nextQuestion = prepareNextQuestion;
@@ -163,24 +159,24 @@
     
     window.showResult = function(isCorrect) {
         if (isCorrect) correctAnswers++;
-    
-        if (currentRound >= totalRounds) {
-            // 若已達到遊戲結束，直接顯示最終結果畫面
-            showFinalResult();
-            return;
-        }
-    
-        // 一般題目時的原有顯示圖片行為
+        
         document.getElementById('full-image').style.display = 'block';
         document.getElementById('result-chart').style.display = 'none';
-        document.getElementById('continue-btn').innerText = '繼續下一題';
+        
+        if (currentRound >= totalRounds) {
+            document.getElementById('continue-btn').innerText = '查看最終結果';
+            document.getElementById('continue-btn').onclick = showFinalResult;
+        } else {
+            document.getElementById('continue-btn').innerText = '繼續下一題';
+            document.getElementById('continue-btn').onclick = prepareNextQuestion;
+        }
+        
         originalShowResult(isCorrect);
-    
         updateInfo();
     };
     
     function showFinalResult() {
-        const accuracy = updateInfo();
+        const accuracy = Math.round((correctAnswers / totalRounds) * 100);
         let message;
         if (accuracy <= 20) message = "池塘有一朵蓮，我採一朵蓮，你採九朵蓮。";
         else if (accuracy <= 40) message = "你的評分3.0，怎麼不找找自己問題。";
@@ -192,10 +188,10 @@
         const overlay = document.getElementById('result-overlay');
         overlay.classList.add('show');
     
-        // 隱藏圖片，顯示圓環圖
         document.getElementById('full-image').style.display = 'none';
         document.getElementById('result-chart').style.display = 'block';
         document.getElementById('continue-btn').innerText = '重新開始';
+        document.getElementById('continue-btn').onclick = () => location.reload();
     
         const ctx = document.getElementById('result-chart').getContext('2d');
     
@@ -226,8 +222,6 @@
         });
     
         animateNumberIncrease(document.getElementById('result-text'), accuracy, message);
-    
-        document.getElementById('continue-btn').onclick = () => location.reload();
     }
 
     function animateNumberIncrease(element, finalNumber, message) {
