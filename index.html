@@ -2,25 +2,186 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <title>英雄聯盟猜英雄遊戲</title>
+    <title>LoL猜猜樂</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #333;
+            color: white;
+        }
+
+        .dark-mode {
+            background-color: #121212;
+            color: white;
+        }
+
+        .light-mode {
+            background-color: #f4f4f4;
+            color: black;
+        }
+
+        #info-container {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .gray-scale {
+            filter: grayscale(100%);
+        }
+
+        .theme-icon {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            background-color: white;
+            border-radius: 50%;
+            padding: 5px;
+        }
+
+        .selected {
+            background-color: #4CAF50 !important;
+        }
+    </style>
 </head>
-<body>
-    <div class="container">
+<body class="dark-mode">
+<div class="navbar">
+    <h1>LoL猜猜樂</h1>
+    <img id="theme-toggle" class="theme-icon" src="moon.png" alt="切換亮暗模式">
+</div>
+
+<div class="container">
+    <div id="game-settings">
+        <h2>選擇遊戲模式與輪數</h2>
+        <button class="mode-btn selected" onclick="selectMode(this, 'easy')">簡單模式</button>
+        <button class="mode-btn" onclick="selectMode(this, 'hard')">困難模式</button>
+        <br><br>
+        <button class="round-btn selected" onclick="selectRounds(this, 30)">30輪</button>
+        <button class="round-btn" onclick="selectRounds(this, 50)">50輪</button>
+        <button class="round-btn" onclick="selectRounds(this, 70)">70輪</button>
+        <button class="round-btn" onclick="selectRounds(this, 100)">100輪</button>
+        <br><br>
+        <button onclick="startGame()">開始遊戲</button>
+    </div>
+
+    <div id="game-area" style="display:none;">
         <h2>猜猜這是哪位英雄？</h2>
         <div id="image-container"></div>
         <div id="options-container"></div>
-    </div>
-
-    <!-- 彈出提示 -->
-    <div id="result-overlay" class="hidden">
-        <div class="result-card">
-            <img id="full-image" src="" alt="完整英雄圖">
-            <h3 id="result-text"></h3>
-            <button id="continue-btn">繼續下一題</button>
+        <div id="info-container">
+            <span id="round-info"></span>
+            <span id="accuracy-info"></span>
         </div>
     </div>
+</div>
 
-    <script src="script.js"></script>
+<div id="result-overlay" class="hidden">
+    <div class="result-card">
+        <img id="full-image" src="" alt="完整英雄圖">
+        <h3 id="result-text"></h3>
+        <button id="continue-btn">繼續下一題</button>
+    </div>
+</div>
+
+<script src="script.js"></script>
+<script>
+    let totalRounds = 30;
+    let currentRound = 0;
+    let correctAnswers = 0;
+    let mode = 'easy';
+    
+    function selectMode(button, selectedMode) {
+        document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('selected'));
+        button.classList.add('selected');
+        mode = selectedMode;
+    }
+    
+    function selectRounds(button, rounds) {
+        document.querySelectorAll('.round-btn').forEach(btn => btn.classList.remove('selected'));
+        button.classList.add('selected');
+        totalRounds = rounds;
+    }
+    
+    function startGame() {
+        document.getElementById('game-settings').style.display = 'none';
+        document.getElementById('game-area').style.display = 'block';
+        currentRound = 0;
+        correctAnswers = 0;
+        prepareNextQuestion();
+    }
+    
+    function updateInfo() {
+        const accuracy = currentRound > 0 ? Math.round((correctAnswers / currentRound) * 100) : 0;
+        document.getElementById('accuracy-info').innerText = `答對率: ${accuracy}%`;
+        document.getElementById('round-info').innerText = `第 ${currentRound+1} 輪 - `;
+        return accuracy;
+    }
+    
+    const originalNextQuestion = window.nextQuestion;
+    
+    function prepareNextQuestion() {
+        
+        
+        if (currentRound >= totalRounds) {
+            showFinalResult();
+            return;
+        }
+        
+        originalNextQuestion();
+        
+        if (mode === 'hard') {
+            const imageContainer = document.getElementById('image-container');
+            imageContainer.classList.add('gray-scale');
+            imageContainer.style.backgroundSize = '500%';
+            
+            let posX, posY;
+            do {
+                posX = Math.random() * 100;
+                posY = Math.random() * 100;
+            } while (posX > 30 && posX < 70 && posY > 30 && posY < 70);
+    
+            imageContainer.style.backgroundPosition = `${posX}% ${posY}%`;
+        }
+        
+        updateInfo();
+        currentRound++;
+    }
+    
+    window.nextQuestion = prepareNextQuestion;
+    
+    const originalShowResult = window.showResult;
+    
+    window.showResult = function(isCorrect) {
+        if (isCorrect) correctAnswers++;
+        originalShowResult(isCorrect);
+        updateInfo();
+    }
+    
+    function showFinalResult() {
+        const accuracy = updateInfo();
+        let message;
+        if (accuracy <= 20) message = "池塘有一朵蓮，我採一朵蓮，你採九朵蓮。";
+        else if (accuracy <= 40) message = "你的評分3.0，怎麼不找找自己問題。";
+        else if (accuracy <= 60) message = "有點東西。";
+        else if (accuracy <= 80) message = "特別牛逼。";
+        else if (accuracy < 100) message = "13.0 carry局。";
+        else message = "你是人機吧 這麼準?";
+    
+        document.getElementById('result-text').innerText = `最終答對率: ${accuracy}%\n${message}`;
+        document.getElementById('result-overlay').classList.add('show');
+        document.getElementById('continue-btn').innerText = "重新開始";
+        document.getElementById('continue-btn').onclick = () => location.reload();
+    }
+    
+    const toggle = document.getElementById('theme-toggle');
+    toggle.onclick = () => {
+        document.body.classList.toggle('light-mode');
+        document.body.classList.toggle('dark-mode');
+        toggle.src = document.body.classList.contains('light-mode') ? 'sun.png' : 'moon.png';
+    };
+</script>
 </body>
 </html>

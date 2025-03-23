@@ -4,7 +4,6 @@ async function loadChampions() {
     const res = await fetch('https://ddragon.leagueoflegends.com/cdn/15.6.1/data/zh_TW/champion.json');
     const data = await res.json();
     champions = Object.values(data.data);
-    nextQuestion();
 }
 
 async function getRandomSkinUrl(championId) {
@@ -61,6 +60,12 @@ function showResult(isCorrect) {
     overlay.classList.add('show');
 }
 
-document.getElementById('continue-btn').onclick = nextQuestion;
+document.getElementById('continue-btn').onclick = () => {
+    if (window.prepareNextQuestion) {
+        window.prepareNextQuestion();
+    } else {
+        nextQuestion(); 
+    }
+};
 
 loadChampions();
