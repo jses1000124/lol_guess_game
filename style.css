@@ -109,6 +109,12 @@ h2 {
     margin-bottom: 15px;
 }
 
+#result-chart {
+    margin: 0 auto 20px auto;
+    display: block;
+}
+
+
 @keyframes fadeIn {
     from { transform: scale(0.7); opacity: 0; }
     to { transform: scale(1); opacity: 1; }

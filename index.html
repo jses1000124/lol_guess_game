@@ -71,21 +71,28 @@
     <div id="game-area" style="display:none;">
         <h2>猜猜這是哪位英雄？</h2>
         <div id="image-container"></div>
-        <div id="options-container"></div>
         <div id="info-container">
             <span id="round-info"></span>
-            <span id="accuracy-info"></span>
         </div>
+        <div id="info-container">
+            <span id="round-info"></span>
+        </div>
+        <div id="options-container"></div>
+
     </div>
 </div>
 
 <div id="result-overlay" class="hidden">
     <div class="result-card">
         <img id="full-image" src="" alt="完整英雄圖">
+        <canvas id="result-chart" width="200" height="200" style="display:none;"></canvas>
         <h3 id="result-text"></h3>
         <button id="continue-btn">繼續下一題</button>
     </div>
 </div>
+
+<!-- 引入Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script src="script.js"></script>
 <script>
@@ -116,8 +123,7 @@
     
     function updateInfo() {
         const accuracy = currentRound > 0 ? Math.round((correctAnswers / currentRound) * 100) : 0;
-        document.getElementById('accuracy-info').innerText = `答對率: ${accuracy}%`;
-        document.getElementById('round-info').innerText = `第 ${currentRound+1} 輪 - `;
+        document.getElementById('round-info').innerText = `第 ${currentRound} 輪`;
         return accuracy;
     }
     
@@ -125,8 +131,8 @@
     
     function prepareNextQuestion() {
         
-        
-        if (currentRound >= totalRounds) {
+        currentRound++;
+        if (currentRound > totalRounds) {
             showFinalResult();
             return;
         }
@@ -148,7 +154,7 @@
         }
         
         updateInfo();
-        currentRound++;
+        
     }
     
     window.nextQuestion = prepareNextQuestion;
@@ -157,9 +163,21 @@
     
     window.showResult = function(isCorrect) {
         if (isCorrect) correctAnswers++;
+    
+        if (currentRound >= totalRounds) {
+            // 若已達到遊戲結束，直接顯示最終結果畫面
+            showFinalResult();
+            return;
+        }
+    
+        // 一般題目時的原有顯示圖片行為
+        document.getElementById('full-image').style.display = 'block';
+        document.getElementById('result-chart').style.display = 'none';
+        document.getElementById('continue-btn').innerText = '繼續下一題';
         originalShowResult(isCorrect);
+    
         updateInfo();
-    }
+    };
     
     function showFinalResult() {
         const accuracy = updateInfo();
@@ -171,10 +189,59 @@
         else if (accuracy < 100) message = "13.0 carry局。";
         else message = "你是人機吧 這麼準?";
     
-        document.getElementById('result-text').innerText = `最終答對率: ${accuracy}%\n${message}`;
-        document.getElementById('result-overlay').classList.add('show');
-        document.getElementById('continue-btn').innerText = "重新開始";
+        const overlay = document.getElementById('result-overlay');
+        overlay.classList.add('show');
+    
+        // 隱藏圖片，顯示圓環圖
+        document.getElementById('full-image').style.display = 'none';
+        document.getElementById('result-chart').style.display = 'block';
+        document.getElementById('continue-btn').innerText = '重新開始';
+    
+        const ctx = document.getElementById('result-chart').getContext('2d');
+    
+        const data = {
+            datasets: [{
+                data: [accuracy, 100 - accuracy],
+                backgroundColor: ['#4CAF50', '#555'],
+                borderWidth: 0
+            }]
+        };
+    
+        const options = {
+            cutout: '70%',
+            animation: {
+                animateRotate: true,
+                duration: 2000,
+            },
+            plugins: {
+                tooltip: { enabled: false },
+                legend: { display: false },
+            }
+        };
+    
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: data,
+            options: options
+        });
+    
+        animateNumberIncrease(document.getElementById('result-text'), accuracy, message);
+    
         document.getElementById('continue-btn').onclick = () => location.reload();
+    }
+
+    function animateNumberIncrease(element, finalNumber, message) {
+        let currentNumber = 0;
+        const duration = 2000;
+        const stepTime = Math.abs(Math.floor(duration / finalNumber));
+    
+        const timer = setInterval(() => {
+            currentNumber++;
+            element.innerText = `最終答對率: ${currentNumber}%\n${message}`;
+            if (currentNumber >= finalNumber) {
+                clearInterval(timer);
+            }
+        }, stepTime);
     }
     
     const toggle = document.getElementById('theme-toggle');
