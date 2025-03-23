@@ -1,14 +1,14 @@
 let champions = [];
 
 async function loadChampions() {
-    const res = await fetch('https://ddragon.leagueoflegends.com/cdn/14.6.1/data/zh_TW/champion.json');
+    const res = await fetch('https://ddragon.leagueoflegends.com/cdn/15.6.1/data/zh_TW/champion.json');
     const data = await res.json();
     champions = Object.values(data.data);
     nextQuestion();
 }
 
 async function getRandomSkinUrl(championId) {
-    const res = await fetch(`https://ddragon.leagueoflegends.com/cdn/14.6.1/data/zh_TW/champion/${championId}.json`);
+    const res = await fetch(`https://ddragon.leagueoflegends.com/cdn/15.6.1/data/zh_TW/champion/${championId}.json`);
     const data = await res.json();
     const skins = data.data[championId].skins;
     const randomSkin = skins[Math.floor(Math.random() * skins.length)];
