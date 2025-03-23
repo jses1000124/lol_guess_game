@@ -21,6 +21,37 @@ body {
     border-radius: 16px;
     border: 3px solid #555;
     overflow: hidden;
+    position: relative;
+}
+
+#image-container.loading::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#image-container.loading::before {
+    content: "圖片載入中...";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 18px;
+    z-index: 1;
+}
+
+.loading-text {
+    padding: 15px;
+    font-size: 18px;
+    color: #aaa;
 }
 
 button {
@@ -43,7 +74,6 @@ h2 {
     font-size: 26px;
 }
 
-/* 結果動畫提示 (overlay) */
 #result-overlay {
     position: fixed;
     top: 0;
@@ -82,4 +112,10 @@ h2 {
 @keyframes fadeIn {
     from { transform: scale(0.7); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
