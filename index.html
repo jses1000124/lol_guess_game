@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>英雄聯盟猜英雄遊戲</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>猜猜這是哪位英雄？</h2>
+        <div id="image-container"></div>
+        <div id="options-container"></div>
+    </div>
+
+    <!-- 彈出提示 -->
+    <div id="result-overlay" class="hidden">
+        <div class="result-card">
+            <img id="full-image" src="" alt="完整英雄圖">
+            <h3 id="result-text"></h3>
+            <button id="continue-btn">繼續下一題</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
