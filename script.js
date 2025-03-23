@@ -18,14 +18,9 @@ async function getRandomSkinUrl(championId) {
     };
 }
 
-function randomEdgePosition() {
-    const edgePositions = [
-        [Math.random() * 10, Math.random() * 80 + 10],      
-        [90 + Math.random() * 10, Math.random() * 80 + 10], 
-        [Math.random() * 80 + 10, Math.random() * 10],      
-        [Math.random() * 80 + 10, 90 + Math.random() * 10]  
-    ];
-    const [posX, posY] = edgePositions[Math.floor(Math.random() * edgePositions.length)];
+function randomPosition() {
+    const posX = Math.random() * 100;
+    const posY = Math.random() * 100;
     return `${posX}% ${posY}%`;
 }
 
@@ -43,7 +38,7 @@ async function nextQuestion() {
 
     const imageContainer = document.getElementById('image-container');
     imageContainer.style.backgroundImage = `url('${correctSkinUrl}')`;
-    imageContainer.style.backgroundPosition = randomEdgePosition();
+    imageContainer.style.backgroundPosition = randomPosition();
 
     const optionsContainer = document.getElementById('options-container');
     optionsContainer.innerHTML = '';
